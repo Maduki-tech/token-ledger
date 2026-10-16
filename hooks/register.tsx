@@ -118,8 +118,6 @@ export const register: Register = on => {
       description: 'Token and cost overview per project and session',
       argumentHint: '[web]',
     })
-    void $.ui.open({ id: PANE, title: 'Tokens' })
-    void load($, await read($, view))
 
     return next(e)
   })
@@ -148,7 +146,8 @@ export const register: Register = on => {
   // fresh numbers once each turn has been written to the transcript
   on('turn.complete', async ($, e, next) => {
     const result = await next(e)
-    void load($, await read($, view))
+    if ((await $.ui.panes()).some(p => p.id === PANE))
+      void load($, await read($, view))
 
     return result
   })
