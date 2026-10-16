@@ -1,0 +1,15 @@
+{
+  "name": "token-ledger",
+  "owner": {
+    "name": "Maduki-tech"
+  },
+  "metadata": {
+    "description": "Token and cost ledger for Claude Code: per project, session, subagent and tool call"
+  },
+  "plugins": [
+    {
+      "name": "token-ledger",
+      "source": "./"
+    }
+  ]
+}

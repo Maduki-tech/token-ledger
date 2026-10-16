@@ -1,0 +1,9 @@
+{
+  "name": "token-ledger",
+  "version": "0.1.0",
+  "description": "Tokens and cost per project, session, subagent and tool call, from your local Claude Code transcripts",
+  "author": { "name": "Maduki-tech" },
+  "repository": "https://github.com/Maduki-tech/token-ledger",
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}
