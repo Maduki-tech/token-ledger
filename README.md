@@ -33,7 +33,7 @@ claude plugin install token-ledger --marketplace Maduki-tech/token-ledger
 
 In the desktop app, where `/plugin` does not run: click + next to the prompt box, then Plugins, Add marketplace with `Maduki-tech/token-ledger`, then Add plugin.
 
-Needs `python3` (standard library only). `/tokens web` opens the browser with `xdg-open`, so on macOS open http://127.0.0.1:4610 yourself.
+Needs `python3` (standard library only). `/tokens web` opens your browser with `xdg-open` on Linux and `open` on macOS.
 
 ## How cost is worked out
 

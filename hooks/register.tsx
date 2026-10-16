@@ -130,7 +130,9 @@ export const register: Register = on => {
       await $.process.run([
         'sh',
         '-c',
-        'setsid -f python3 "$0" >/dev/null 2>&1 </dev/null; sleep 0.4; xdg-open "$1" >/dev/null 2>&1 </dev/null',
+        // setsid and xdg-open on Linux; macOS has neither: nohup and open
+        'if command -v setsid >/dev/null; then setsid -f python3 "$0"; else nohup python3 "$0" & fi >/dev/null 2>&1 </dev/null;' +
+          ' sleep 0.4; { xdg-open "$1" || open "$1"; } >/dev/null 2>&1 </dev/null',
         `${$.plugin.root}/scripts/server.py`,
         WEB,
       ])
