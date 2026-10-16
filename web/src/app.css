@@ -1,0 +1,89 @@
+@import 'tailwindcss';
+
+/* Colours are tokens that switch with the theme; Tailwind's palette is off so only these exist. */
+@theme inline {
+  --color-*: initial;
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-grid: var(--grid);
+  --color-axis: var(--axis);
+  --color-ring: var(--ring);
+  --color-hover: var(--hover);
+  --color-s1: var(--s1);
+  --color-critical: var(--critical);
+  --color-good: var(--good);
+  --color-transparent: transparent;
+
+  --text-*: initial;
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 12.5px;
+  --text-md: 13px;
+  --text-base: 14px;
+  --text-lg: 20px;
+  --text-xl: 22px;
+  --text-2xl: 24px;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', Menlo, monospace;
+}
+
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10); --hover: rgba(11,11,11,0.04);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s7: #6250d6;
+  --other: #b5b4ad; --critical: #d03b3b; --good: #0ca30c;
+  --seq-in: #9ec5f4; --seq-out: #2a78d6; --seq-cw: #184f95; --seq-cr: #cde2fb;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --hover: rgba(255,255,255,0.05);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s7: #9085e9;
+    --other: #5c5b57; --seq-in: #3987e5; --seq-out: #86b6ef; --seq-cw: #cde2fb; --seq-cr: #184f95;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --hover: rgba(255,255,255,0.05);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s7: #9085e9;
+  --other: #5c5b57; --seq-in: #3987e5; --seq-out: #86b6ef; --seq-cw: #cde2fb; --seq-cr: #184f95;
+}
+
+@layer base {
+  body { background: var(--page); color: var(--ink); font: 14px/1.45 var(--font-sans); }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 6px 8px;
+    border-bottom: 1px solid var(--axis); white-space: nowrap; user-select: none; }
+  td { padding: 7px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+  select, input[type="search"] { color: var(--ink); background: var(--surface);
+    border: 1px solid var(--ring); border-radius: 8px; padding: 5px 8px; }
+  h2 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--ink-2); }
+}
+
+/* Shared by many components; one name instead of the same utility list at every site. */
+@utility num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+@utility trunc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@utility card { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: 16px; min-width: 0; }
+@utility row-click {
+  cursor: pointer;
+  &:hover td, &.sel td { background: var(--hover); }
+  &:focus-visible { outline: 2px solid var(--s1); outline-offset: -2px; }
+}
+@utility empty { color: var(--muted); padding: 24px 0; text-align: center; }
+@utility toggle { border: 1px solid var(--ring); color: var(--ink-2); border-radius: 8px; padding: 5px 9px; cursor: pointer; }
+
+/* labels the 3D views float over towers and nodes (lib/stage.js) */
+.sky-label {
+  font-size: 12px; line-height: 1.3; padding: 3px 8px; border-radius: 6px; text-align: center; white-space: nowrap;
+  max-width: 28ch; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums;
+  background: color-mix(in srgb, var(--surface) 85%, transparent); border: 1px solid var(--ring); color: var(--ink);
+  backdrop-filter: blur(4px);
+  &.hot { border-color: var(--s2); }
+}

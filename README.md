@@ -57,7 +57,14 @@ claude plugin test .                 # the pane and /tokens web
 claude plugin validate .
 ```
 
-Files: `hooks/register.tsx` (pane and commands), `scripts/usage.py` (reads transcripts, works out costs), `scripts/server.py` (local web server, binds 127.0.0.1 only), `web/index.html` (the dashboard, no build step).
+Files: `hooks/register.tsx` (pane and commands), `scripts/usage.py` (reads transcripts, works out costs), `scripts/server.py` (local web server, binds 127.0.0.1 only), `web/` (the dashboard: Svelte and Tailwind in `web/src`, built into `web/dist`).
+
+The dashboard's built files are committed, so users need no Node. After changing anything in `web/src`, rebuild and commit `web/dist` with it:
+
+```
+cd web && npm install && npm run build
+npm run dev   # hot reload on http://localhost:5173, with the API from a running server.py
+```
 
 ## License
 

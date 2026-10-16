@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 """Local web view of the token ledger: http://127.0.0.1:4610
 
-Serves web/index.html and a JSON API over usage.py. Binds localhost only.
-Exits quietly when the port is taken (an earlier server is still running).
+Serves the built dashboard (web/dist) and a JSON API over usage.py. Binds localhost only.
+Replaces an earlier server on the port, which may be running older code; exits quietly
+when something else holds it.
 """
-import json, os, sys
+import json, os, sys, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
+from urllib.request import Request, urlopen
 
 sys.path.insert(0, os.path.dirname(__file__))
 import usage  # noqa: E402
 
 PORT = int(os.environ.get("TOKEN_LEDGER_PORT", "4610"))
-INDEX = os.path.join(os.path.dirname(__file__), "..", "web", "index.html")
+DIST = os.path.join(os.path.dirname(__file__), "..", "web", "dist")
+# the whole dashboard, as `npm run build` in web/ writes it: an allow-list, never a path to open
+STATIC = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript"),
+          "/app.css": ("app.css", "text/css")}
 
 
 def name(q, key):
@@ -35,14 +40,25 @@ def hours(q):
     return min(max(float((q.get("h") or ["24"])[0]), 1), 24 * 365)
 
 
+# a custom header makes a browser preflight, which this server never grants: no web page can stop it
+QUIT = {"X-Token-Ledger": "quit"}
+
+
 class Handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        if urlparse(self.path).path != "/api/quit" or self.headers.get("X-Token-Ledger") != "quit":
+            return self.send(404, b'{"error":"not found"}')
+        self.send(200, b'{}')
+        self.server.shutdown()  # handler threads are separate from serve_forever, so this returns
+
     def do_GET(self):
         url = urlparse(self.path)
         q = parse_qs(url.query)
         try:
-            if url.path == "/":
-                with open(INDEX, "rb") as f:
-                    return self.send(200, f.read(), "text/html; charset=utf-8")
+            if url.path in STATIC:
+                file, ctype = STATIC[url.path]
+                with open(os.path.join(DIST, file), "rb") as f:
+                    return self.send(200, f.read(), ctype)
             if url.path == "/api/icon":
                 icon = usage.find_icon(project(q).removeprefix("dir:"))
                 if not icon:
@@ -68,7 +84,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "max-age=300" if ctype.startswith("image/") else "no-store")
         # an SVG opened on its own must not run scripts on this origin
         self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'" if ctype.startswith("image/")
-                         else "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self'")
+                         else "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.end_headers()
         self.wfile.write(data)
@@ -77,9 +93,24 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
-if __name__ == "__main__":
+def bind():
     try:
-        server = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
+        return ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
     except OSError:
-        sys.exit(0)  # already running
-    server.serve_forever()
+        return None
+
+
+if __name__ == "__main__":
+    server = bind()
+    if not server:
+        try:
+            urlopen(Request(f"http://127.0.0.1:{PORT}/api/quit", method="POST", headers=QUIT), timeout=2).close()
+        except OSError:
+            sys.exit(0)  # not ours, or too old to know /api/quit
+        for _ in range(20):
+            time.sleep(0.05)
+            if server := bind():
+                break
+        else:
+            sys.exit(0)
+    server.serve_forever(poll_interval=0.1)  # a quit lands fast, inside the 0.4 s before the browser opens

@@ -126,7 +126,7 @@ export const register: Register = on => {
 
   on('command.run', { command: 'tokens' }, async ($, e) => {
     if (e.args.trim() === 'web') {
-      // detached, so it outlives this session; exits by itself if one already runs
+      // detached, so it outlives this session; replaces a server already running
       await $.process.run([
         'sh',
         '-c',
